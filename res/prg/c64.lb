@@ -1,0 +1,620 @@
+/*THE ALPHABET SPRITES!!!*/
+:CHARACTER_NULL
+.byte 0
+.byte 1
+.byte 2
+.byte 3
+.byte 4
+.byte 5
+.byte 6
+.byte 7
+
+:CHARACTER_EXPLANATION_MARK
+.byte 0
+.byte 12
+.byte 12
+.byte 12
+.byte 12
+.byte 12
+.byte 0
+.byte 12
+
+:CHARACTER_DOUBLE_QUOTES
+.byte 0
+.byte 102
+.byte 102
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_HASHTAG
+.byte 0
+.byte 102
+.byte 102
+.byte 255
+.byte 102
+.byte 255
+.byte 102
+.byte 102
+
+:CHARACTER_DOLLAR
+.byte 0
+.byte 24
+.byte 124
+.byte 6
+.byte 60
+.byte 96
+.byte 62
+.byte 24
+
+:CHARACTER_PROCENT
+.byte 0
+.byte 70
+.byte 102
+.byte 48
+.byte 24
+.byte 12
+.byte 102
+.byte 98
+
+:CHARACTER_AND
+.byte 0
+.byte 60
+.byte 102
+.byte 60
+.byte 28
+.byte 230
+.byte 102
+.byte 252
+
+:CHARACTER_SINGLE_QUOTE
+.byte 0
+.byte 48
+.byte 24
+.byte 12
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_OPENING_BRACKET
+.byte 0
+.byte 24
+.byte 12
+.byte 6
+.byte 6
+.byte 6
+.byte 12
+.byte 24
+
+:CHARACTER_CLOSING_BRACKET
+.byte 0
+.byte 24
+.byte 48
+.byte 96
+.byte 96
+.byte 96
+.byte 48
+.byte 24
+
+:CHARACTER_TIMES
+.byte 0
+.byte 0
+.byte 102
+.byte 60
+.byte 255
+.byte 60
+.byte 102
+.byte 0
+
+:CHARACTER_PLUS
+.byte 0
+.byte 0
+.byte 24
+.byte 24
+.byte 126
+.byte 24
+.byte 24
+.byte 0
+
+:CHARACTER_COMMA
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 6
+
+:CHARACTER_MINUS
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 126
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_DOT
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+
+:CHARACTER_FORWARD_SLASH
+.byte 0
+.byte 0
+.byte 192
+.byte 96
+.byte 48
+.byte 24
+.byte 12
+.byte 6
+
+:CHARACTER_ZERO
+.byte 0
+.byte 60
+.byte 102
+.byte 118
+.byte 110
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_ONE
+.byte 0
+.byte 24
+.byte 24
+.byte 28
+.byte 24
+.byte 24
+.byte 24
+.byte 126
+
+:CHARACTER_TWO
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 48
+.byte 12
+.byte 6
+.byte 126
+
+:CHARACTER_THREE
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 56
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_FOUR
+.byte 0
+.byte 96
+.byte 112
+.byte 120
+.byte 102
+.byte 254
+.byte 96
+.byte 96
+
+:CHARACTER_FIVE
+.byte 0
+.byte 126
+.byte 6
+.byte 62
+.byte 96
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_SIX
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 62
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_SEVEN
+.byte 0
+.byte 126
+.byte 102
+.byte 48
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_EIGHT
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 60
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_NINE
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 124
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_COLON
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+
+:CHARACTER_SEMICOLON
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 6
+
+:CHARACTER_ARROW_LEFT
+.byte 0
+.byte 112
+.byte 24
+.byte 12
+.byte 6
+.byte 12
+.byte 24
+.byte 112
+
+:CHARACTER_EQUALS
+.byte 0
+.byte 0
+.byte 0
+.byte 126
+.byte 0
+.byte 126
+.byte 0
+.byte 0
+
+:CHARACTER_ARROW_RIGHT
+.byte 0
+.byte 14
+.byte 24
+.byte 48
+.byte 96
+.byte 48
+.byte 24
+.byte 14
+
+:CHARACTER_QUESTION_MARK
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 48
+.byte 24
+.byte 0
+.byte 24
+
+:CHARACTER_AT
+.byte 0 
+.byte 60
+.byte 102
+.byte 118
+.byte 118
+.byte 6
+.byte 70
+.byte 60
+
+:CHARACTER_A
+.byte 0
+.byte 24
+.byte 60
+.byte 102
+.byte 126
+.byte 102
+.byte 102
+.byte 102
+
+:CHARACTER_B
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+
+:CHARACTER_C
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 6
+.byte 6
+.byte 102
+.byte 60
+
+:CHARACTER_D
+.byte 0
+.byte 30
+.byte 54
+.byte 102
+.byte 102
+.byte 102
+.byte 54
+.byte 30
+
+:CHARACTER_E
+.byte 0
+.byte 126
+.byte 6
+.byte 6
+.byte 30
+.byte 6
+.byte 6
+.byte 126
+
+:CHARACTER_F
+.byte 0
+.byte 126
+.byte 6
+.byte 6
+.byte 30
+.byte 6
+.byte 6
+.byte 6
+
+:CHARACTER_G
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 118
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_H
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 126
+.byte 102
+.byte 102
+.byte 102
+
+:CHARACTER_I
+.byte 0
+.byte 60
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 60
+
+:CHARACTER_J
+.byte 0
+.byte 120
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 54
+.byte 28
+
+:CHARACTER_K
+.byte 0
+.byte 102
+.byte 54
+.byte 30
+.byte 14
+.byte 30
+.byte 54
+.byte 102
+
+:CHARACTER_L
+.byte 0
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 126
+
+:CHARACTER_M
+.byte 0
+.byte 198
+.byte 238
+.byte 254
+.byte 214
+.byte 198
+.byte 198
+.byte 198
+
+:CHARACTER_N
+.byte 0
+.byte 102
+.byte 110
+.byte 126
+.byte 126
+.byte 118
+.byte 102
+.byte 102
+
+:CHARACTER_O
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_P
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 6
+.byte 6
+.byte 6
+
+:CHARACTER_Q
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 112
+
+:CHARACTER_R
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 30
+.byte 54
+.byte 102
+
+:CHARACTER_S
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 60
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_T
+.byte 0
+.byte 126
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_U
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_V
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+
+:CHARACTER_W
+.byte 0
+.byte 198
+.byte 198
+.byte 198
+.byte 214
+.byte 254
+.byte 238
+.byte 198
+
+:CHARACTER_X
+.byte 0
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+.byte 60
+.byte 102
+.byte 102
+
+:CHARACTER_Y
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_Z
+.byte 0
+.byte 126
+.byte 96
+.byte 48
+.byte 24
+.byte 12
+.byte 6
+.byte 126
+
+:CHARACTER_OPENING_SQUARE_BRACKET
+.byte 0
+.byte 30
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 30
+
+:CHARACTER_BACKWARD_SLASH
+.byte 0
+.byte 0
+.byte 6
+.byte 12
+.byte 24
+.byte 48
+.byte 96
+.byte 192
+
+:CHARACTER_CLOSING_SQUARE_BRACKET
+.byte 0
+.byte 30
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 30

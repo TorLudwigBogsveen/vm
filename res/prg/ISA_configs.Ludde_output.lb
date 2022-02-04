@@ -1,0 +1,44 @@
+/*Initializes the stack pointer*/
+MOVDIR 200 SP
+
+MOVDIR 64 RA /*width*/
+MOVDIR 64 RB /*height*/
+MOVDIR 000 RC /*offset*/
+MOVIR 0 HD
+
+
+/*Set screen size*/
+INT HD
+
+MOVDIR 2 1
+MOVDIR 3 2
+PUSHD 0
+PUSHD 1
+PUSHD 1
+PUSHD 2
+POPD 1
+POPD 0
+CALLI Add_d
+MOVDRR 0 3
+POPD 1
+POPD 0
+BRK
+
+:Add_d
+	PUSHD RB
+	PUSHD RC
+
+	:Add_d_loop
+		MOVDIR 0 RC
+		CMPD RB RC
+		MOVDIR Add_d_end RC
+		JE RC 
+		INCD RA
+		DECD RB
+		MOVDIR Add_d_loop RC
+		JMP RC
+
+	:Add_d_end
+		POPD RC
+		POPD RB
+		RET
