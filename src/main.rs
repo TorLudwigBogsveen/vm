@@ -21,6 +21,7 @@
  *   SOFTWARE.
  */
 
+
 #[macro_use]
 extern crate lazy_static;
 extern crate minifb;
@@ -29,8 +30,8 @@ use std::{io::Read, fs::File};
 
 use minifb::{Key, Window, WindowOptions};
 
-const WIDTH: usize = 640*2;
-const HEIGHT: usize = 360*2;
+const WIDTH: usize = 640;
+const HEIGHT: usize = 360;
 
 use cpu::CPU;
 
@@ -40,6 +41,7 @@ mod ram;
 mod instructions;
 mod assembler;
 mod frame_buffer;
+mod io;
 use ram::*;
 use assembler::*;
 
@@ -110,7 +112,9 @@ fn main() {
     let mut ram = RAM::new();
     let cpu = CPU::new();
 
-    let bin = assemble("res/prg/test.lb");
+    let bin = assemble("res/prg/core.lb");
+    //let bin = assemble("res/prg/test.lb");
+    //let bin = assemble("res/prg/add.lb");
     //let bin = assemble("res/prg/ISA_configs.Ludde_output.lb");
     for b in bin.iter().enumerate() {
         //println!("{} : {}", b.0, b.1cargo );

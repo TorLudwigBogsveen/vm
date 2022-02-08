@@ -186,6 +186,106 @@ lazy_static! {
       ("INT", InstructionToken::new(Instruction::INT, &[
         OperandToken::Reg8,
       ])),
+      ("ADD", InstructionToken::new(Instruction::ADD, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("SUB", InstructionToken::new(Instruction::SUB, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("MUL", InstructionToken::new(Instruction::MUL, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("DIV", InstructionToken::new(Instruction::DIV, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("OR", InstructionToken::new(Instruction::OR, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("AND", InstructionToken::new(Instruction::AND, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("XOR", InstructionToken::new(Instruction::XOR, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("NOR", InstructionToken::new(Instruction::NOR, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("NAND", InstructionToken::new(Instruction::NAND, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("XNOR", InstructionToken::new(Instruction::XNOR, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("SHL", InstructionToken::new(Instruction::SHL, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("SHR", InstructionToken::new(Instruction::SHR, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
+      ("ADDD", InstructionToken::new(Instruction::ADDD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("SUBD", InstructionToken::new(Instruction::SUBD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("MULD", InstructionToken::new(Instruction::MULD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("DIVD", InstructionToken::new(Instruction::DIVD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("ORD", InstructionToken::new(Instruction::ORD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("ANDD", InstructionToken::new(Instruction::ANDD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("XORD", InstructionToken::new(Instruction::XORD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("NORD", InstructionToken::new(Instruction::NORD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("NANDD", InstructionToken::new(Instruction::NANDD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("XNORD", InstructionToken::new(Instruction::XNORD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("SHLD", InstructionToken::new(Instruction::SHLD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("SHRD", InstructionToken::new(Instruction::SHRD, &[
+        OperandToken::Reg16,
+        OperandToken::Reg16,
+      ])),
+      ("OUT", InstructionToken::new(Instruction::OUT, &[
+        OperandToken::Reg8,
+        OperandToken::Reg8,
+      ])),
     ];
   
     for ins_token in instruction_tokens {
@@ -364,8 +464,12 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
 
   for lable in lable_destinations {
     //println!("[{}][{}]", lable.0, lables[&lable.0].1);
-    bin[lable.1]      = lable_locations[lable.0] as u8;
-    bin[lable.1 + 1]  = (lable_locations[lable.0] >> 8) as u8;
+    if lable_locations.contains_key(lable.0) {
+      bin[lable.1]      = lable_locations[lable.0] as u8;
+      bin[lable.1 + 1]  = (lable_locations[lable.0] >> 8) as u8;
+    } else {
+      println!("Cannot find lable {} defined anywhere!", lable.0);
+    }
   }
 }
 

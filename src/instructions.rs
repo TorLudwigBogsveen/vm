@@ -21,7 +21,10 @@
  *   SOFTWARE.
  */
 
+use std::ops::ShlAssign;
+
 use crate::cpu::*;
+use crate::io;
 use crate::ram::*;
 
 #[repr(u8)]
@@ -65,7 +68,216 @@ pub enum Instruction {
   CALLI,
   RET,
   INT,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  OR,
+  AND,
+  XOR,
+  NOR,
+  NAND,
+  XNOR,
+  SHR,
+  SHL,
+  ADDD,
+  SUBD,
+  MULD,
+  DIVD,
+  ORD,
+  ANDD,
+  XORD,
+  NORD,
+  NANDD,
+  XNORD,
+  SHLD,
+  SHRD,
+  OUT,
 }
+
+pub fn out(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+
+  let out_param = *cpu.reg_8(ram.get(src));
+  let out_param = io::OutputDirective::from(out_param);
+
+  let output = match out_param {
+    io::OutputDirective::U8 => {
+      format!("{}", *cpu.reg_8(ram.get(dst)))
+    }
+    _ => unimplemented!()
+  };
+
+  println!("{}", output);
+}
+
+pub fn shl(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  (*cpu.reg_8(ram.get(dst))) <<= *cpu.reg_8(ram.get(src));
+}
+
+pub fn shr(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  (*cpu.reg_8(ram.get(dst))) >>= *cpu.reg_8(ram.get(src));
+}
+
+pub fn add(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_8(ram.get(dst))).overflowing_add(*cpu.reg_8(ram.get(src)));
+  *cpu.reg_8(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn sub(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_8(ram.get(dst))).overflowing_sub(*cpu.reg_8(ram.get(src)));
+  *cpu.reg_8(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn mul(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_8(ram.get(dst))).overflowing_mul(*cpu.reg_8(ram.get(src)));
+  *cpu.reg_8(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn div(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_8(ram.get(dst))).overflowing_div(*cpu.reg_8(ram.get(src)));
+  *cpu.reg_8(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn or(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_8(ram.get(dst)) |= *cpu.reg_8(ram.get(src));
+}
+
+pub fn and(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_8(ram.get(dst)) &= *cpu.reg_8(ram.get(src));
+}
+
+pub fn xor(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_8(ram.get(dst)) ^= *cpu.reg_8(ram.get(src));
+}
+
+pub fn nor(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_8(ram.get(dst)) | *cpu.reg_8(ram.get(src));
+  *cpu.reg_8(ram.get(dst)) = !res;
+}
+
+pub fn nand(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_8(ram.get(dst)) & *cpu.reg_8(ram.get(src));
+  *cpu.reg_8(ram.get(dst)) = !res;
+}
+
+pub fn xnor(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_8(ram.get(dst)) ^ *cpu.reg_8(ram.get(src));
+  *cpu.reg_8(ram.get(dst)) = !res;
+}
+
+pub fn shld(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  (*cpu.reg_16(ram.get(dst))) <<= *cpu.reg_16(ram.get(src));
+}
+
+pub fn shrd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  (*cpu.reg_16(ram.get(dst))) >>= *cpu.reg_16(ram.get(src));
+}
+
+pub fn addd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_16(ram.get(dst))).overflowing_add(*cpu.reg_16(ram.get(src)));
+  *cpu.reg_16(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn subd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_16(ram.get(dst))).overflowing_sub(*cpu.reg_16(ram.get(src)));
+  *cpu.reg_16(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn muld(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_16(ram.get(dst))).overflowing_mul(*cpu.reg_16(ram.get(src)));
+  *cpu.reg_16(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn divd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = (*cpu.reg_16(ram.get(dst))).overflowing_div(*cpu.reg_16(ram.get(src)));
+  *cpu.reg_16(ram.get(dst)) = res.0;
+  cpu.flags.carry = res.1;
+}
+
+pub fn ord(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_16(ram.get(dst)) |= *cpu.reg_16(ram.get(src));
+}
+
+pub fn andd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_16(ram.get(dst)) &= *cpu.reg_16(ram.get(src));
+}
+
+pub fn xord(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  *cpu.reg_16(ram.get(dst)) ^= *cpu.reg_16(ram.get(src));
+}
+
+pub fn nord(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_16(ram.get(dst)) | *cpu.reg_16(ram.get(src));
+  *cpu.reg_16(ram.get(dst)) = !res;
+}
+
+pub fn nandd(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_16(ram.get(dst)) & *cpu.reg_16(ram.get(src));
+  *cpu.reg_16(ram.get(dst)) = !res;
+}
+
+pub fn xnord(cpu: &mut CPU, ram: &mut RAM) {
+  let src = cpu.ins_ptr(1);
+  let dst = cpu.ins_ptr(1);
+  let res = *cpu.reg_16(ram.get(dst)) ^ *cpu.reg_16(ram.get(src));
+  *cpu.reg_16(ram.get(dst)) = !res;
+}
+
 
 pub fn movrr(cpu: &mut CPU, ram: &mut RAM) {
   let src = cpu.ins_ptr(1);
@@ -171,6 +383,7 @@ pub fn inc(cpu: &mut CPU, ram: &mut RAM) {
     Some(_) => {},
     None => {
       cpu.flags.owerflow = true;
+      cpu.flags.carry = true;
     }
   }
   *cpu.reg_8(dst) = (*cpu.reg_8(dst)).wrapping_add(1);

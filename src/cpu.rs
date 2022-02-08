@@ -31,6 +31,7 @@ pub struct Flags {
     pub owerflow: bool,
     pub underflow: bool,
     pub halted: bool,
+    pub carry: bool,
 }
  
 impl Flags {
@@ -43,6 +44,7 @@ impl Flags {
         owerflow: false,
         underflow: false,
         halted: false,
+        carry: false,
         }
     }
 }
@@ -179,6 +181,31 @@ impl CPU {
             Instruction::CALLI  => calli(self, ram),
             Instruction::RET    => ret (self, ram),
             Instruction::INT    => int(self, ram),
+            Instruction::ADD    => add(self, ram),
+            Instruction::SUB    => sub(self, ram),
+            Instruction::MUL    => mul(self, ram),
+            Instruction::DIV    => div(self, ram),
+            Instruction::OR     => or (self, ram),
+            Instruction::AND    => and(self, ram),
+            Instruction::XOR    => xor(self, ram),
+            Instruction::NOR    => nor(self, ram),
+            Instruction::NAND   =>nand(self, ram),
+            Instruction::XNOR   =>xnor(self, ram),
+            Instruction::SHL    => shl(self, ram),
+            Instruction::SHR    => shr(self, ram),
+            Instruction::ADDD   => addd(self, ram),
+            Instruction::SUBD   => subd(self, ram),
+            Instruction::MULD   => muld(self, ram),
+            Instruction::DIVD   => divd(self, ram),
+            Instruction::ORD    => ord(self, ram),
+            Instruction::ANDD   => andd(self, ram),
+            Instruction::XORD   => xord(self, ram),
+            Instruction::NORD   => nord(self, ram),
+            Instruction::NANDD  =>nandd(self, ram),
+            Instruction::XNORD  =>xnord(self, ram),
+            Instruction::SHLD   => shld(self, ram),
+            Instruction::SHRD   => shrd(self, ram),
+            Instruction::OUT    => out(self, ram),
             Instruction::BRK    => self.flags.halted = true,
             _ => { 
                 println!("ERROR INVALID INSTRUCTION [{}] at [{}]",

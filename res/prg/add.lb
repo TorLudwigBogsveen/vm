@@ -1,0 +1,22 @@
+/*Initializes the stack pointer*/
+MOVDIR 200 SP
+
+/*Sets width and height of screen in pixels*/
+MOVDIR 32 RA /*width*/
+MOVDIR 32 RB /*height*/
+MOVDIR 000 RC /*offset*/
+MOVIR 0 HD
+
+
+/*Set screen size*/
+INT HD
+
+MOVIR 0 HC
+
+MOVDIR LABLE RB
+:LABLE
+MOVIR 2 HA
+MOVIR 2 LA
+SHL HA LA
+OUT HC LA
+JMP RB
