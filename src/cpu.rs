@@ -134,16 +134,22 @@ impl CPU {
 
     pub fn step(&mut self, ram: &mut RAM) {
         if self.flags.halted {
-            //println!("zzz");
-            //std::thread::sleep_ms(1000);
-            //self.flags.halted = false;
             return;
         }
 
         let instruction = ram.get(self.ins_ptr(1));
-        //println!("instruction: {} location: {}", instruction, self.ins_ptr(0)-1);
+        let instruction = if let Ok(instruction) = Instruction::try_from(instruction) {
+            instruction
+        } else {
+            println!("ERROR INVALID INSTRUCTION [{}] at [{}]",
+            instruction,
+            *self.reg_16(self.instruction_ptr)-1);   
+            self.flags.halted = true;
+            return;
+        };
+        
 
-        match unsafe { std::mem::transmute(instruction) } {
+        match instruction {
             Instruction::NOP    => {},
             Instruction::MOVRR  => movrr (self, ram),
             Instruction::MOVRM  => movrm (self, ram),
@@ -207,12 +213,6 @@ impl CPU {
             Instruction::SHRD   => shrd(self, ram),
             Instruction::OUT    => out(self, ram),
             Instruction::BRK    => self.flags.halted = true,
-            _ => { 
-                println!("ERROR INVALID INSTRUCTION [{}] at [{}]",
-                instruction,
-                *self.reg_16(self.instruction_ptr)-1);   
-                self.flags.halted = true;
-            }
         }
     }
 

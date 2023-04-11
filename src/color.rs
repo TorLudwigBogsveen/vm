@@ -65,9 +65,6 @@ impl Color {
 impl From<u32> for Color { fn from(rgba: u32) -> Self { Self { rgba } } }
 impl From<Color> for u32 { fn from(color: Color) -> Self { color.rgba } }
 
-impl From<f32> for Color { fn from(rgba: f32) -> Self { Self { rgba: unsafe { std::mem::transmute(rgba) } } } }
-impl From<Color> for f32 { fn from(color: Color) -> Self { unsafe { std::mem::transmute(color.rgba) } } }
-
 impl From<(f32, f32, f32, f32)> for Color {
     fn from(rgba: (f32, f32, f32, f32)) -> Self {
         let r = (rgba.0 * 255.0) as u32;
@@ -127,21 +124,3 @@ impl From<Color> for (u8, u8, u8, u8) {
         (r, g, b, a)
     }
 }
-
-pub const RED           : Color = Color { rgba: 0xFF0000FF };
-pub const LIGHT_RED     : Color = Color { rgba: 0xFFCCCBFF };
-pub const DARK_RED      : Color = Color { rgba: 0x8B0000FF };
-pub const GREEN         : Color = Color { rgba: 0x00FF00FF };
-pub const LIGHT_GREEN   : Color = Color { rgba: 0x90EE90FF };
-pub const DARK_GREEN    : Color = Color { rgba: 0x013220FF };
-pub const BLUE          : Color = Color { rgba: 0x0000FFFF };
-pub const LIGHT_BLUE    : Color = Color { rgba: 0xADD8E6FF };
-pub const DARK_BLUE     : Color = Color { rgba: 0x00008BFF };
-pub const WHITE         : Color = Color { rgba: 0xFFFFFFFF };
-pub const BLACK         : Color = Color { rgba: 0x000000FF };
-pub const ORANGE        : Color = Color { rgba: 0xFFA500FF };
-pub const LIGHT_ORANGE  : Color = Color { rgba: 0xFED8B1FF };
-pub const DARK_ORANGE   : Color = Color { rgba: 0xFF8C00FF };
-pub const YELLOW        : Color = Color { rgba: 0xFFFF00FF };
-pub const LIGHT_YELLOW  : Color = Color { rgba: 0xFFFFEDFF };
-pub const DARK_YELLOW   : Color = Color { rgba: 0x9B870CFF };

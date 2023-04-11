@@ -299,9 +299,6 @@ lazy_static! {
 #[derive(Clone)]
 enum OperandToken {
   Val8,
-  Val16,
-  Val32,
-  Val64,
   Ptr,
   Char,
   Reg8,
@@ -332,30 +329,15 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
     _ => false,
   }}).collect();
 
-
-  for lable in &lable_tokens_indices {
-    //println!("{} : {}", lable.0, lable.1);
-  }
-
   let mut lable_locations = HashMap::new();
   let mut lable_destinations = Vec::new();
-  /*let mut lables = {
-    let mut lbls = HashMap::new(); 
-    for lable in lables {
-      lbls.insert(lable.0, (lable.1, 0));
-    } 
-    lbls
-  };
 
-  let mut lable_locations = Vec::new();*/
 
   let mut index = 0;
   while index < tokens.len() {
     let mut index_add = |index: &mut usize, bin: &Vec<u8>| {
       for lable in &lable_tokens_indices {
         if *lable.1 == (*index) as u16 {
-          //println!("{}", );
-          //println!("init {}: {}: {}", *lable.0, index, bin.len() as u16 - 1);
           lable_locations.insert(lable.0 as &str, bin.len() as u16 - 1);
         }
       }
@@ -364,7 +346,6 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
 
     match &tokens[index] {
       Token::Instruction(ins) => {
-        //println!("Ins: {} at: {} : {}", ins, index, bin.len());
         match INSTRUCTION_TOKENS.get(ins) {
           Some(ins_token) => {
             bin.push(ins_token.instruction as u8);
@@ -373,21 +354,6 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
               match operand {
                 OperandToken::Val8 => {
                   bin.push(tokens[index].as_operand().unwrap().parse().unwrap());
-                }
-                OperandToken::Val16 => {
-                  bin.push(tokens[index].as_operand().unwrap().parse().unwrap());
-                  bin.push(0);
-                }
-                OperandToken::Val32 => {
-                  bin.push(tokens[index].as_operand().unwrap().parse().unwrap());
-                  bin.push(0);
-                  bin.push(0);
-                  bin.push(0);
-                }
-                OperandToken::Val64 => {
-                  bin.push(tokens[index].as_operand().unwrap().parse().unwrap());
-                  bin.push(0); bin.push(0); bin.push(0);
-                  bin.push(0); bin.push(0); bin.push(0); bin.push(0);
                 }
                 OperandToken::Ptr => {
                   match tokens[index].as_operand().unwrap().parse::<u16>() {
@@ -444,11 +410,9 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
         match d as &str {
           "byte" => {
             bin.push(tokens[index+1].as_operand().unwrap().parse::<u8>().unwrap());
-            //println!("{}", bin[bin.len()-1]);
           }
           "char" => {
             bin.push(tokens[index+1].as_operand().unwrap().as_bytes()[0]);
-            //println!("{}", bin[bin.len()-1]);
           }
           "str" => {
             bin.extend_from_slice(tokens[index+1].as_operand().unwrap().as_bytes());
@@ -463,7 +427,6 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
   }
 
   for lable in lable_destinations {
-    //println!("[{}][{}]", lable.0, lables[&lable.0].1);
     if lable_locations.contains_key(lable.0) {
       bin[lable.1]      = lable_locations[lable.0] as u8;
       bin[lable.1 + 1]  = (lable_locations[lable.0] >> 8) as u8;
@@ -492,37 +455,10 @@ fn assemble_lables(tokens: &[Token]) -> HashMap<String, u16> {
       }
       _=> {}
     }
-    //index += 1;
   }
 
   lables
 }
-
-/*fn assemble_macros(tokens: &mut Vec<Token>) {
-  let mut token_iter = tokens.iter();
-  while let Some(token) = token_iter.next() {
-    match token {
-      Token::Macro(m) => {
-        let m: &str = &m.to_uppercase();
-        match m {
-          "INCLUDE" => {
-            match token_iter.next().unwrap() {
-              Token::Operand(file_name) => {
-                assemble_file(file_name);
-                //tokens.
-              }
-              _ => {
-                println!("chrash i assemble macros prut.");
-              }
-            }
-          }
-          _=> {}
-        }
-      }
-      _=> {}
-    }
-  }
-}*/
 
 fn assemble_file(file_name: &str) -> Vec<Token> {
   let mut file = File::open(file_name).unwrap();
@@ -543,7 +479,6 @@ fn assemble_file(file_name: &str) -> Vec<Token> {
 }
 
 enum Token {
-  None,
   Comment(String),
   Instruction(String),
   Lable(String),
@@ -553,23 +488,6 @@ enum Token {
 }
 
 impl Token {
-  /*pub fn data_to_bytes(&self) -> Vec<u8> {
-    match self {
-      Token::Data(d) => {
-        let words = d.split_ascii_whitespace().collect::<Vec<&str>>();
-        let mut data = Vec::new();
-        match words[0] {
-          "byte" => {data.push(words[1].parse().unwrap())}
-          "str" => {data.extend_from_slice(words[1].as_bytes())}
-          _ => panic!()
-        }
-
-        return data;
-      }
-      _=> panic!() 
-    }
-  }*/
-
   pub fn new(raw_data: &[&str], index: &mut usize) -> Token {
     let chars: Vec<char> = raw_data[0].chars().collect();
 
@@ -629,44 +547,7 @@ impl Token {
 
 pub fn assemble(file_name: &str) -> Vec<u8> {
   let mut bin = Vec::new();
-
   let tokens = assemble_file(file_name);
-  let mut index = 0;
-  /*for (_index, token) in tokens.iter().enumerate() {
-    print!("Index: {} ", index);
-    match token {
-      Token::Lable(l) => {
-        println!("Lable: {}", l);
-      }
-      Token::Comment(c) => {
-        println!("Comment: {}", c);
-      }
-      Token::Instruction(i) => {
-        index += 1;
-        println!("Instruction: {}", i);
-      }
-      Token::Operand(i) => {
-        index += 1;
-        println!("Operand: {}", i);
-      }
-      Token::Macro(m) => {
-        println!("Macro: {}", m);
-      }
-      Token::Data(d) => {
-        println!("Data: {}", d);
-      }
-      _ => {
-        println!("NONE!");
-      }
-    }
-  }*/
-
-
- 
   assemble_instructions(&mut bin, tokens);  
-
-  //let mut tokens = assemble_labels(&words);
-  //assemble_instructions(&mut bin, &tokens.0, &tokens.1);
-
   bin
 }

@@ -1,0 +1,1400 @@
+/*#INCLUDE Core.lb Det här funkar inte än*/
+
+/*Initializes the stack pointer*/
+MOVDIR 2000 SP
+
+/*Sets width and height of screen in pixels*/
+MOVDIR 256 RA /*width*/
+MOVDIR 256 RB /*height*/
+MOVDIR 000 RC /*offset*/
+MOVIR 0 HD
+
+
+/*Set screen size*/
+INT HD
+
+MOVIR 100 LA /*Y*/
+MOVIR 64 LB /*H,C*/
+MOVIR 0 HA /*X*/
+MOVIR 1 HB /*W*/
+
+PUSHD RA
+
+:Loop
+	POPD RA	
+	CALLI WordToStringDecTest
+	/*CALLI PowDTest
+	MOVDIR 0 RA
+	CALLI ByteToStringBinTest
+	CALLI StringTest
+	CALLI CharTest
+	CALLI RectTest
+	CALLI FibTest*/
+	PUSHD RA
+	MOVDIR Loop RA
+	JMP RA
+	/*CALLI Loop*/
+
+:PowDTest
+	MOVIR 99 LA
+	MOVIR 2 HA
+	CALLI Pow_d
+	
+	RET
+
+:ByteToStringBinTest
+	PUSHD RA
+	INCD RD
+	PUSHD RD
+	MOVDRR RD RA
+	CALLI Fib
+
+	MOVDIR TestString RB
+	PUSH LA
+	MOVRR HA LA
+	CALLI Byte_to_string_bin
+	POP LA
+
+	MOVDIR TestString RB
+	PUSHD RA
+	MOVDIR 8 RA
+	CALLI Add_d
+	MOVDRR RA RB
+	POPD RA
+
+	
+	CALLI Byte_to_string_bin
+
+	MOVIR 100 LA /*Y*/
+	MOVIR 0 HA /*X*/
+	MOVDIR TestString RB
+
+	CALLI Draw_string
+
+
+	POPD RD
+	POPD RA
+	RET
+
+:WordToStringDecTest
+	PUSHD RA
+	INCD RD
+	PUSHD RD
+	MOVDRR RD RA
+	CALLI Fib
+
+	MOVDIR TestString RB
+
+	CALLI Word_to_string_dec
+	
+
+	MOVIR 100 LA /*Y*/
+	MOVIR 0 HA /*X*/
+	MOVDIR TestString RB
+
+	CALLI Draw_string
+
+
+	POPD RD
+	POPD RA
+	RET
+
+/*
+LA : src byte
+HA : comparasion
+RB : dst str ptr
+*/
+:Byte_to_string_bin
+	MOVIR 8 HD
+	MOVIR 0 LD
+	MOVIR 0 HA
+	
+:Byte_to_string_bin_loop
+	DEC HD
+
+	PUSH LA
+	MOVIR 2 LA
+	MOVRR HD HA
+	CALLI Pow
+	MOVRR LA HA
+	POP LA
+	
+
+	MOVDIR Byte_to_string_bin_greater_equal RC
+	CMP LA HA
+	JE RC
+	JG RC
+
+	MOVDIR 48 RC
+	MOVDRP RC RB
+
+:Byte_to_string_bin_end
+	INCD RB
+
+	MOVDIR Byte_to_string_bin_loop RC
+	CMP HD LD
+	JNE RC
+
+	MOVDIR 0 RC
+	MOVDRP RC RB
+	RET
+
+:Byte_to_string_bin_greater_equal
+	CALLI Sub
+	MOVDIR 49 RC
+	MOVDRP RC RB
+	MOVDIR Byte_to_string_bin_end RC
+	JMP RC
+
+/*
+RA : src value
+RB : dst str ptr
+*/
+:Word_to_string_dec
+	PUSHD RC
+	PUSHD RD
+	PUSHD RE
+	PUSHD RF
+
+	MOVDRR RA RC /*RC : src value*/
+	MOVDRR RB RD /*RD : dst str ptr*/
+
+	MOVIR 10 LA /*LA : Base     for exponantiation*/
+	MOVIR 4  HA /*HA : exponent for exponantiation*/
+	
+	
+:Word_to_string_dec_loop
+	PUSHD RA /*save exponantiation values*/
+	CALLI Pow_d
+	MOVDRR RA RB
+	POPD RA /*retrives exponantiation values*/
+
+	MOVDIR Word_to_string_dec_greater_equal RE
+	CMPD RC RB /*compares the inputed src value and the result of exponantiation*/
+	JE RE 
+	JG RE
+
+:Word_to_string_dec_write_out
+	PUSHD RA
+	PUSHD RB
+	
+	MOVDIR 48 RA
+	MOVDRR RF RB
+	MOVDIR 0 RF
+	CALLI Add_d
+	MOVDRP RA RD
+	INCD RD
+
+	POPD RB
+	POPD RA
+
+	PUSH LA
+	MOVIR 0 LA
+
+	MOVDIR Word_to_string_dec_loop RE
+	CMP LA HA
+	DEC HA /*decrements the exponant*/
+	POP LA
+	JNE RE
+
+:Word_to_string_dec_end
+	POPD RF
+	POPD RE
+	POPD RD
+	POPD RC
+	RET
+
+:Word_to_string_dec_greater_equal
+	PUSHD RA
+	MOVDRR RC RA
+	CALLI Sub_d
+	MOVDRR RA RC
+	POPD RA
+
+	INCD RF
+	MOVDIR Word_to_string_dec_loop RE
+	JMP RE
+
+/*
+LA : Y
+HA : X
+RB : string ptr
+*/
+:TestString
+.char H
+.char E
+.char L
+.char L
+.char O
+.byte 32
+.char T
+.char H
+.char E
+.char R
+.char E
+.char !
+.byte 0
+
+:StringTest
+	PUSH HA
+	MOVIR 8 HA
+	CALLI Add
+	POP HA
+	
+	MOVDIR TestString RB
+	CALLI Draw_string
+	RET
+
+/*
+LA : Y
+LB : C
+HA : X
+HB : 
+*/
+:CharTest
+	/*******CHANGE TO THE NEXT CHAR********/
+	PUSHD RA
+	MOVIR 1 HA
+	MOVRR LB LA
+	CALLI Add
+	MOVRR LA LB
+	POPD RA
+	
+	CALLI Draw_char
+	
+	/*******ADD ONE TO THE X POSITION OF THE CHAR*********/
+	PUSH LA
+	MOVIR 1 LA
+	CALLI Add
+	MOVRR LA HA
+	POP LA
+	
+	
+	RET
+
+:FibTest
+	INCD RC
+
+	MOVDRR RC RA
+	CALLI Fib
+	MOVDRR RA RE
+
+	RET
+
+:RectTest
+	CALLI Draw_rect
+	PUSH HA
+	MOVIR 1 HA
+	CALLI Add
+	POP HA
+	RET
+:Fib
+	PUSHD RB
+	PUSHD RC
+	MOVDIR Fib_end RC
+
+	MOVDIR 0 RB
+	CMPD RA RB
+	JE RC
+
+	MOVDIR Fib_end_one RC
+
+	MOVDIR 3 RB
+	CMPD RA RB
+	JL RC
+
+	DECD RA
+	MOVDRR RA RB
+
+	CALLI Fib
+	MOVDRR RA RC
+	MOVDRR RB RA
+
+	DECD RA
+
+	CALLI Fib
+
+	MOVDRR RC RB
+
+	CALLI Add_d
+
+	MOVDIR Fib_end RC
+	JMP RC
+
+	:Fib_end_one
+		MOVDIR 1 RA
+
+	:Fib_end
+		POPD RC
+		POPD RB
+		RET
+
+/*???*/
+MOVDIR 0 RB
+
+/*
+LA : Y
+LB : H
+HA : X
+HB : W
+*/
+
+:Draw_rect
+	PUSHD RA /*Used as index to current pixel/byte */
+	PUSHD RB
+	PUSHD RC
+	PUSHD RD
+
+	/*Checks if width or height is 0 and returns if true*/
+	MOVDIR Draw_end_immidiate RC
+	MOVIR 0 HD
+	
+	CMP HB HD
+	JE RC
+	CMP LB HD
+	JE RC
+	
+	
+
+	PUSHD RB
+	MOVDIR 0 RB
+	PUSH HA
+
+	MOVRR LA LB /*Moves x into LB*/
+
+	MOVDIR 16 RA /*index = y * width*/
+	CALLI Mul_d
+	POP LB
+	CALLI Add_d
+
+	POPD RB
+	PUSH HB
+
+	:Draw_loop_x
+		PUSH LC
+		MOVIR 255 LC /*Writes the pixel data to the target byte*/
+		
+		MOVRP LC RA
+		POP LC
+		INCD RA
+		DEC HB
+
+		MOVIR 0 HC
+		CMP HB HC
+		MOVDIR Draw_loop_y RC
+		JE RC
+		MOVDIR Draw_loop_x RC
+		JMP RC
+
+	:Draw_loop_y
+		POP HB
+		PUSH HB
+
+		DEC LB
+
+		PUSHD RB
+		MOVRR HB LB
+		MOVIR 0 HB
+
+		CALLI Sub_d
+
+		MOVDIR 16 RB
+
+		CALLI Add_d
+
+		POPD RB
+
+
+		MOVIR 0 HC
+		CMP LB HC
+		MOVDIR Draw_end RC
+		JE RC
+		MOVDIR Draw_loop_x RC
+		JMP RC
+	:Draw_end
+		POP HB
+	:Draw_end_immidiate
+		POPD RD
+		POPD RC
+		POPD RB
+		POPD RA
+		RET
+
+
+:Add_d
+	PUSHD RB
+	PUSHD RC
+
+	:Add_d_loop
+		MOVDIR 0 RC
+		CMPD RB RC
+		MOVDIR Add_d_end RC
+		JE RC 
+		INCD RA
+		DECD RB
+		MOVDIR Add_d_loop RC
+		JMP RC
+
+	:Add_d_end
+		POPD RC
+		POPD RB
+		RET
+
+:Sub_d
+	PUSHD RB
+	PUSHD RC
+
+	:Sub_d_loop
+		MOVDIR 0 RC
+		CMPD RB RC
+		MOVDIR Sub_d_end RC
+		JE RC 
+		DECD RA
+		DECD RB
+		MOVDIR Sub_d_loop RC
+		JMP RC
+
+	:Sub_d_end
+		POPD RC
+		POPD RB
+		RET
+
+:Add
+	PUSHD RC
+	PUSH HA
+
+	:Add_loop
+		MOVIR 0 HC
+		CMP HA HC
+		MOVDIR Add_end RC
+		JE RC 
+		INC LA
+		DEC HA
+		MOVDIR Add_loop RC
+		JMP RC
+
+	:Add_end
+		POP HA
+		POPD RC
+		RET
+		
+:Sub
+	PUSHD RC
+	PUSH HA
+
+	:Sub_loop
+		MOVIR 0 HC
+		CMP HA HC
+		MOVDIR Sub_end RC
+		JE RC 
+		DEC LA
+		DEC HA
+		MOVDIR Sub_loop RC
+		JMP RC
+
+	:Sub_end
+		POP HA
+		POPD RC
+		RET
+
+:Mul_d
+	PUSHD RB
+	PUSHD RC
+	PUSHD RD
+
+	MOVDRR RA RD
+	MOVDIR 0 RA
+
+	:Mul_d_loop
+		MOVDIR 0 RC
+		CMPD RC RD
+		MOVDIR Mul_d_end RC
+		JE RC 
+		CALLI Add_d
+		DECD RD
+		MOVDIR Mul_d_loop RC
+		JMP RC
+
+	:Mul_d_end
+		POPD RD
+		POPD RC
+		POPD RB
+		RET
+
+:Mul
+	PUSHD RB
+	PUSHD RC
+
+	MOVRR LA LB
+	MOVIR 0 LA
+
+	:Mul_loop
+		MOVIR 0 HC
+		CMP LB HC
+		MOVDIR Mul_end RC
+		JE RC 
+		CALLI Add
+		DEC LB
+		MOVDIR Mul_loop RC
+		JMP RC
+
+	:Mul_end
+		POPD RC
+		POPD RB
+		RET
+
+:Pow
+	PUSHD RB
+	PUSHD RC
+
+	MOVRR HA HB
+	MOVRR LA HA
+
+	MOVIR 0 HC
+	CMP HB HC
+	MOVDIR Pow_zeroth RC
+	JE RC
+	DEC HB 
+
+	:Pow_loop
+		MOVIR 0 HC
+		CMP HB HC
+		MOVDIR Pow_end RC
+		JE RC 
+		CALLI Mul
+		DEC HB
+		MOVDIR Pow_loop RC
+		JMP RC
+
+	:Pow_zeroth
+		MOVIR 1 LA
+
+	:Pow_end
+		POPD RC
+		POPD RB
+		RET
+
+/*
+LA : base
+HA : exponent
+RA : result
+*/
+:Pow_d
+	PUSHD RB
+	PUSHD RC
+	PUSHD RD
+
+	MOVIR 0  HD
+	MOVRR LA LD
+
+	MOVIR 0 HB
+	CMP HA HB
+	MOVDIR Pow_d_zeroth RC
+	JE RC
+
+	DEC HA 
+
+	:Pow_d_loop
+		MOVDIR Pow_d_end RC
+		MOVIR 0 HB
+		CMP HA HB
+		JE RC
+
+		PUSHD RA
+		PUSHD RB
+
+		MOVIR 0  HB
+		MOVRR LA LB
+
+		MOVDRR RD RA 
+		CALLI Mul_d
+		MOVDRR RA RD
+		POPD RB
+		POPD RA
+
+		DEC HA
+		MOVDIR Pow_d_loop RC
+		JMP RC
+
+	:Pow_d_zeroth
+		MOVDIR 1 RD
+
+	:Pow_d_end
+		MOVDRR RD RA
+		POPD RD
+		POPD RC
+		POPD RB
+		RET
+
+
+/*
+LA : Y
+HA : X
+RB : String ptr 
+*/
+:Draw_string
+	PUSHD RA
+	PUSHD RB
+	PUSHD RC
+	PUSHD RD
+	MOVDRR RB RC
+	:Draw_string_loop
+		MOVPR RC LB
+		MOVIR 0 HB
+		CMP HB LB
+		MOVDIR Draw_string_end RD
+		JE RD
+		
+		CALLI Draw_char
+		INC HA
+		INCD RC
+		
+		MOVDIR Draw_string_loop RD
+		JMP RD
+
+	:Draw_string_end
+		POPD RD
+		POPD RC
+		POPD RB
+		POPD RA
+		RET
+		
+/*
+LA : Y
+LB : C
+HA : X
+HB : 
+*/
+:Draw_char
+	PUSHD RA /*Used as index to current pixel/byte */
+	PUSHD RB
+	PUSHD RC
+	
+	/******SHIFTS THE CHAR DOWN ELIMINATING NON PRINTABLE ASCII CHARS*******/
+	PUSHD RA
+	MOVRR LB LA
+	MOVIR 32 HA
+	CALLI Sub
+	MOVRR LA HC
+	POPD RA
+	
+	
+	
+	
+	/*******CALCULATES THE BYTE INDEX IN RA*******/
+	MOVDIR 0 RB
+	PUSH HA
+
+	MOVRR LA LB /*Moves y into LB*/
+
+	MOVDIR 32 RA /*index = y * width*/
+	CALLI Mul_d
+	POP LB
+	CALLI Add_d
+	
+	/*************************************/
+	
+	MOVDIR 0 RB
+	MOVRR HC LB
+	PUSHD RA
+	MOVDIR 8 RA
+	CALLI Mul_d
+	
+	MOVDIR CHARACTER_NULL RB
+	CALLI Add_d
+	MOVDRR RA RB 
+	POPD RA
+	
+	
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	MOVPR RB HC
+	MOVRP HC RA
+	INCD RB
+	PUSHD RB
+	MOVDIR 32 RB
+	CALLI Add_d
+	POPD RB
+	
+	
+	POPD RC
+	POPD RB
+	POPD RA
+	
+	RET
+
+/*THE ALPHABET SPRITES!!!*/
+:CHARACTER_NULL
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_EXPLANATION_MARK
+.byte 0
+.byte 12
+.byte 12
+.byte 12
+.byte 12
+.byte 12
+.byte 0
+.byte 12
+
+:CHARACTER_DOUBLE_QUOTES
+.byte 0
+.byte 102
+.byte 102
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_HASHTAG
+.byte 0
+.byte 102
+.byte 102
+.byte 255
+.byte 102
+.byte 255
+.byte 102
+.byte 102
+
+:CHARACTER_DOLLAR
+.byte 0
+.byte 24
+.byte 124
+.byte 6
+.byte 60
+.byte 96
+.byte 62
+.byte 24
+
+:CHARACTER_PROCENT
+.byte 0
+.byte 70
+.byte 102
+.byte 48
+.byte 24
+.byte 12
+.byte 102
+.byte 98
+
+:CHARACTER_AND
+.byte 0
+.byte 60
+.byte 102
+.byte 60
+.byte 28
+.byte 230
+.byte 102
+.byte 252
+
+:CHARACTER_SINGLE_QUOTE
+.byte 0
+.byte 48
+.byte 24
+.byte 12
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_OPENING_BRACKET
+.byte 0
+.byte 24
+.byte 12
+.byte 6
+.byte 6
+.byte 6
+.byte 12
+.byte 24
+
+:CHARACTER_CLOSING_BRACKET
+.byte 0
+.byte 24
+.byte 48
+.byte 96
+.byte 96
+.byte 96
+.byte 48
+.byte 24
+
+:CHARACTER_TIMES
+.byte 0
+.byte 0
+.byte 102
+.byte 60
+.byte 255
+.byte 60
+.byte 102
+.byte 0
+
+:CHARACTER_PLUS
+.byte 0
+.byte 0
+.byte 24
+.byte 24
+.byte 126
+.byte 24
+.byte 24
+.byte 0
+
+:CHARACTER_COMMA
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 6
+
+:CHARACTER_MINUS
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 126
+.byte 0
+.byte 0
+.byte 0
+
+:CHARACTER_DOT
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+
+:CHARACTER_FORWARD_SLASH
+.byte 0
+.byte 0
+.byte 192
+.byte 96
+.byte 48
+.byte 24
+.byte 12
+.byte 6
+
+:CHARACTER_ZERO
+.byte 0
+.byte 60
+.byte 102
+.byte 118
+.byte 110
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_ONE
+.byte 0
+.byte 24
+.byte 24
+.byte 28
+.byte 24
+.byte 24
+.byte 24
+.byte 126
+
+:CHARACTER_TWO
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 48
+.byte 12
+.byte 6
+.byte 126
+
+:CHARACTER_THREE
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 56
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_FOUR
+.byte 0
+.byte 96
+.byte 112
+.byte 120
+.byte 102
+.byte 254
+.byte 96
+.byte 96
+
+:CHARACTER_FIVE
+.byte 0
+.byte 126
+.byte 6
+.byte 62
+.byte 96
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_SIX
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 62
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_SEVEN
+.byte 0
+.byte 126
+.byte 102
+.byte 48
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_EIGHT
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 60
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_NINE
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 124
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_COLON
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+
+:CHARACTER_SEMICOLON
+.byte 0
+.byte 12
+.byte 12
+.byte 0
+.byte 0
+.byte 12
+.byte 12
+.byte 6
+
+:CHARACTER_ARROW_LEFT
+.byte 0
+.byte 112
+.byte 24
+.byte 12
+.byte 6
+.byte 12
+.byte 24
+.byte 112
+
+:CHARACTER_EQUALS
+.byte 0
+.byte 0
+.byte 0
+.byte 126
+.byte 0
+.byte 126
+.byte 0
+.byte 0
+
+:CHARACTER_ARROW_RIGHT
+.byte 0
+.byte 14
+.byte 24
+.byte 48
+.byte 96
+.byte 48
+.byte 24
+.byte 14
+
+:CHARACTER_QUESTION_MARK
+.byte 0
+.byte 60
+.byte 102
+.byte 96
+.byte 48
+.byte 24
+.byte 0
+.byte 24
+
+:CHARACTER_AT
+.byte 0 
+.byte 60
+.byte 102
+.byte 118
+.byte 118
+.byte 6
+.byte 70
+.byte 60
+
+:CHARACTER_A
+.byte 0
+.byte 24
+.byte 60
+.byte 102
+.byte 126
+.byte 102
+.byte 102
+.byte 102
+
+:CHARACTER_B
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+
+:CHARACTER_C
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 6
+.byte 6
+.byte 102
+.byte 60
+
+:CHARACTER_D
+.byte 0
+.byte 30
+.byte 54
+.byte 102
+.byte 102
+.byte 102
+.byte 54
+.byte 30
+
+:CHARACTER_E
+.byte 0
+.byte 126
+.byte 6
+.byte 6
+.byte 30
+.byte 6
+.byte 6
+.byte 126
+
+:CHARACTER_F
+.byte 0
+.byte 126
+.byte 6
+.byte 6
+.byte 30
+.byte 6
+.byte 6
+.byte 6
+
+:CHARACTER_G
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 118
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_H
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 126
+.byte 102
+.byte 102
+.byte 102
+
+:CHARACTER_I
+.byte 0
+.byte 60
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 60
+
+:CHARACTER_J
+.byte 0
+.byte 120
+.byte 48
+.byte 48
+.byte 48
+.byte 48
+.byte 54
+.byte 28
+
+:CHARACTER_K
+.byte 0
+.byte 102
+.byte 54
+.byte 30
+.byte 14
+.byte 30
+.byte 54
+.byte 102
+
+:CHARACTER_L
+.byte 0
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 126
+
+:CHARACTER_M
+.byte 0
+.byte 198
+.byte 238
+.byte 254
+.byte 214
+.byte 198
+.byte 198
+.byte 198
+
+:CHARACTER_N
+.byte 0
+.byte 102
+.byte 110
+.byte 126
+.byte 126
+.byte 118
+.byte 102
+.byte 102
+
+:CHARACTER_O
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_P
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 6
+.byte 6
+.byte 6
+
+:CHARACTER_Q
+.byte 0
+.byte 60
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 112
+
+:CHARACTER_R
+.byte 0
+.byte 62
+.byte 102
+.byte 102
+.byte 62
+.byte 30
+.byte 54
+.byte 102
+
+:CHARACTER_S
+.byte 0
+.byte 60
+.byte 102
+.byte 6
+.byte 60
+.byte 96
+.byte 102
+.byte 60
+
+:CHARACTER_T
+.byte 0
+.byte 126
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_U
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+
+:CHARACTER_V
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+
+:CHARACTER_W
+.byte 0
+.byte 198
+.byte 198
+.byte 198
+.byte 214
+.byte 254
+.byte 238
+.byte 198
+
+:CHARACTER_X
+.byte 0
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+.byte 60
+.byte 102
+.byte 102
+
+:CHARACTER_Y
+.byte 0
+.byte 102
+.byte 102
+.byte 102
+.byte 60
+.byte 24
+.byte 24
+.byte 24
+
+:CHARACTER_Z
+.byte 0
+.byte 126
+.byte 96
+.byte 48
+.byte 24
+.byte 12
+.byte 6
+.byte 126
+
+:CHARACTER_OPENING_SQUARE_BRACKET
+.byte 0
+.byte 30
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 6
+.byte 30
+
+:CHARACTER_BACKWARD_SLASH
+.byte 0
+.byte 0
+.byte 6
+.byte 12
+.byte 24
+.byte 48
+.byte 96
+.byte 192
+
+:CHARACTER_CLOSING_SQUARE_BRACKET
+.byte 0
+.byte 30
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 30

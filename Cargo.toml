@@ -10,3 +10,4 @@ resolver = "2"
 [dependencies]
 minifb = "*"
 lazy_static = "*"
+num_enum = "*"

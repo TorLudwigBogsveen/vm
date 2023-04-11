@@ -50,40 +50,24 @@ use crate::color::Color;
 struct VM {
     ram: RAM,
     cpu: CPU,
-    time: f32,
 }
 
 fn on_update(vm: &mut VM, window: &mut Window) -> bool { 
-    const time_step: f32 = 0.01;
+    for _ in 0..100000 {
+        vm.cpu.step(&mut vm.ram);
+    }
 
-    //self.time += dt;
-    //if self.time >= time_step {
-        //self.time -= time_step;
-        for _ in 0..4000 {
-            vm.cpu.step(&mut vm.ram);
-            let v1 = *vm.cpu.reg_16(0);
-            let v2 = *vm.cpu.reg_16(1);
-            let v3 = *vm.cpu.reg_16(2);
-            let v4 = *vm.cpu.reg_16(3);
-            //println!("{}, {}, {}, {}", v1, v2, v3, v4);
-        }
-    //}
     let win_width  = vm.cpu.window.width;
     let win_height = vm.cpu.window.height;
     let win_offset = vm.cpu.window.offset;
 
-    let colors = [Color::new(0.2, 0.2, 0.2, 1.0), Color::new(0.8, 0.8, 0.8, 1.0)];
-
-    let mut colors = Vec::new();
-    for i in 0..2 {
-        colors.push(Color::from((i*256*100)));
-    }
+    let colors = [Color::from(0xff0d1137), Color::from(0xffe52165)];
 
     let frame_buffer = frame_buffer::FrameBuffer::new(&vm.ram.buff[win_offset as usize..], win_width, win_height, &colors[..]);
     if win_width == 0 || win_height == 0 {
         return true;
     }
-    // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
+
     window
         .update_with_buffer(&frame_buffer.data, win_width as usize, win_height as usize)
         .unwrap();
@@ -99,30 +83,16 @@ fn load_bin(path: &str) -> Vec<u8> {
 }
  
 fn main() {
-    /*let cols = [Color::from(0xFF_FF_FF_FF), Color::from(0x00_00_00_FF), Color::from(0x00_AA_00_FF)];
-    let data = [
-        0b00101101, 
-        0b11111111
-    ];
-    let frame_buffer = frame_buffer::FrameBuffer::new(&data, 0, 2, 2, &cols);
-    for i in 0..(frame_buffer.data.len()/4) {
-        println!("r: {}, g: {} b: {}", frame_buffer.data[i*4+0], frame_buffer.data[i*4+1], frame_buffer.data[i*4+2]);
-    }*/
-
     let mut ram = RAM::new();
     let cpu = CPU::new();
 
-    let bin = assemble("res/prg/core.lb");
     //let bin = assemble("res/prg/test.lb");
     //let bin = assemble("res/prg/add.lb");
     //let bin = assemble("res/prg/ISA_configs.Ludde_output.lb");
-    for b in bin.iter().enumerate() {
-        //println!("{} : {}", b.0, b.1cargo );
-    }
-    println!("{}", bin.len());
+    let bin = assemble("res/prg/core.lb");
 
     ram.set_multiple(0x00, &bin[..]);
-    let mut vm = VM {ram, cpu, time: 0.0};
+    let mut vm = VM {ram, cpu};
 
     let mut window = Window::new(
         "Test - ESC to exit",
@@ -134,11 +104,7 @@ fn main() {
         panic!("{}", e);
     });
 
-    // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-
     while window.is_open() && !window.is_key_down(Key::Escape) {
         on_update(&mut vm, &mut window);
-        
     }
 }

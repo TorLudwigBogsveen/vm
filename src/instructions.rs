@@ -21,14 +21,14 @@
  *   SOFTWARE.
  */
 
-use std::ops::ShlAssign;
-
 use crate::cpu::*;
 use crate::io;
 use crate::ram::*;
+use num_enum::IntoPrimitive;
+use num_enum::TryFromPrimitive;
 
 #[repr(u8)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, IntoPrimitive, TryFromPrimitive)]
 pub enum Instruction {
   NOP,
   BRK,
@@ -109,7 +109,7 @@ pub fn out(cpu: &mut CPU, ram: &mut RAM) {
     _ => unimplemented!()
   };
 
-  println!("{}", output);
+  println!("{}", output); //TODO OUTPUT TO CUSTOM CONSOLE
 }
 
 pub fn shl(cpu: &mut CPU, ram: &mut RAM) {
