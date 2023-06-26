@@ -104,8 +104,11 @@ pub fn out(cpu: &mut CPU, ram: &mut RAM) {
 
   let output = match out_param {
     io::OutputDirective::U8 => {
-      format!("{}", *cpu.reg_8(ram.get(dst)))
-    }
+      format!("{}", *cpu.reg_8(ram.get(dst)) as u8)
+    },
+    io::OutputDirective::S8 => {
+      format!("{}", *cpu.reg_8(ram.get(dst)) as i8)
+    },
     _ => unimplemented!()
   };
 
@@ -319,6 +322,9 @@ pub fn movrp(cpu: &mut CPU, ram: &mut RAM) {
   let src = cpu.ins_ptr(1);
   let dst = ram.get(cpu.ins_ptr(1));
   ram.set(*cpu.reg_16(dst), *cpu.reg_8(ram.get(src)));
+
+  //let a = *cpu.reg_16(dst);
+  //println!("{} = {}", a, ram.get(a));
 }
 
 pub fn movpr(cpu: &mut CPU, ram: &mut RAM) {
@@ -343,6 +349,7 @@ pub fn movdmr(cpu: &mut CPU, ram: &mut RAM) {
   let src = ram.get_ptr(cpu.ins_ptr(2));
   let dst = cpu.ins_ptr(1);
   *cpu.reg_16(ram.get(dst)) = ram.get_ptr(src);
+  //println!("{}", ram.get_ptr(src));
 }
 
 pub fn movdmm(cpu: &mut CPU, ram: &mut RAM) {
@@ -360,9 +367,10 @@ pub fn movdir(cpu: &mut CPU, ram: &mut RAM) {
 }
 
 pub fn movdim(cpu: &mut CPU, ram: &mut RAM) {
-  let src = cpu.ins_ptr(1);
+  let src = cpu.ins_ptr(2);
   let dst = ram.get_ptr(cpu.ins_ptr(2));
   ram.set_ptr(dst, ram.get_ptr(src));
+ // println!("{}", ram.get_ptr(dst));
 }
 
 pub fn movdrp(cpu: &mut CPU, ram: &mut RAM) {

@@ -47,7 +47,7 @@ impl From<u8> for OutputDirective {
             7 => Self::B16,
             8 => Self::C8,
             9 => Self::C16,
-            _ => unreachable!(),
+            _ => panic!(),
         }
     }
 }

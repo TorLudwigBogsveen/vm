@@ -99,7 +99,7 @@ lazy_static! {
         OperandToken::Reg16,
       ])),
       ("MOVDRM", InstructionToken::new(Instruction::MOVDRM, &[
-        OperandToken::Val8,
+        OperandToken::Reg16,
         OperandToken::Ptr,
       ])),
       ("MOVDMR", InstructionToken::new(Instruction::MOVDMR, &[
@@ -356,7 +356,7 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
                   bin.push(tokens[index].as_operand().unwrap().parse().unwrap());
                 }
                 OperandToken::Ptr => {
-                  match tokens[index].as_operand().unwrap().parse::<u16>() {
+                  match tokens[index].as_operand().expect(&format!("Expected PTR found {:?}", tokens[index])).parse::<u16>() {
                     Ok(num) => {
                       bin.push(num as u8);
                       bin.push((num >> 8) as u8);
@@ -380,13 +380,13 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
                       if let Ok(num) = tokens[index].as_operand().unwrap().parse::<u8>() {
                         bin.push(num);
                       } else {
-                        println!("ERROR TOKEN IS NOT A VALID 8 BIT REGISTER!!!", /*tokens[index].as_operand().unwrap()*/);
+                        println!("ERROR TOKEN: {:?} IS NOT A VALID 8 BIT REGISTER!!!", tokens[index]);
                       }
                     }
                   }
                 }
                 OperandToken::Reg16 => {
-                  match REGISTERS_U16.get(tokens[index].as_operand().unwrap()) {
+                  match REGISTERS_U16.get(tokens[index].as_operand().expect(&format!("Token is not a reg16: {:?}", tokens[index]))) {
                     Some(num) => {
                       bin.push(*num);
                     }
@@ -394,7 +394,7 @@ fn assemble_instructions(bin: &mut Vec<u8>, tokens: Vec<Token>) {
                       if let Ok(num) = tokens[index].as_operand().unwrap().parse::<u8>() {
                         bin.push(num);
                       } else {
-                        println!("ERROR TOKEN IS NOT A VALID 16 BIT REGISTER!!!", /*tokens[index].as_operand().unwrap()*/);
+                        println!("ERROR TOKEN: {:?} IS NOT A VALID 16 BIT REGISTER!!!", tokens[index]);
                       }
                     }
                   }
@@ -478,6 +478,7 @@ fn assemble_file(file_name: &str) -> Vec<Token> {
   tokens
 }
 
+#[derive(Debug)]
 enum Token {
   Comment(String),
   Instruction(String),

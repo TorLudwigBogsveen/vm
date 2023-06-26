@@ -1,0 +1,92 @@
+CALLI START
+BRK
+
+:WIDTH
+.byte 160
+.byte 0
+
+:HEIGHT
+.byte 90
+.byte 0
+
+:OFFSET
+.byte 0
+.byte 10
+
+:START
+
+/*Initializes the stack pointer*/
+MOVDIR 20000 SP
+
+/*Sets width and height of screen in pixels*/
+MOVDMR WIDTH RA 
+MOVDMR HEIGHT RB
+MOVDMR OFFSET RC
+MOVIR 0 HD
+
+
+/*Set screen size*/
+INT HD
+
+MOVDIR 0 RB /*y*/
+:Y_Loop
+MOVDIR 0 RA /*x*/
+    :X_Loop
+    /*Index calculation*/
+    PUSHD RA
+    PUSHD RB
+    ADDD RC RA /*index = offset + x*/
+    MOVDMR WIDTH RE
+    MULD RE RB /*y * width*/
+    ADDD RB RA /*index = offset + x  + y * width*/
+    /*PAINT TEST*/
+    PUSHD RC
+    PUSHD RA
+    CALLI XOR_SHIFT
+    MOVRR HA HB
+    POPD RA
+    POPD RC
+
+    MOVRP HB RA
+
+    POPD RB
+    POPD RA
+
+    /*x += 1*/
+    INCD RA
+    MOVDMR WIDTH RE
+    CMPD RA RE
+    MOVDIR X_Loop RE
+    JNE RE
+INCD RB
+MOVDMR HEIGHT RE
+CMPD RB RE
+MOVDIR Y_Loop RE
+JNE RE
+RET
+
+:XOR_SHIFT_SEED
+.byte 225
+.byte 172
+
+:XOR_SHIFT
+MOVDMR XOR_SHIFT_SEED RA
+
+MOVDRR RA RB
+MOVDIR 7 RC
+SHLD RC RB /*SEED <<= 7*/
+XORD RB RA 
+
+MOVDRR RA RB
+MOVDIR 9 RC
+SHRD RC RB /*SEED <<= 7*/
+XORD RB RA 
+
+MOVDRR RA RB
+MOVDIR 8 RC
+SHLD RC RB /*SEED <<= 7*/
+XORD RB RA
+
+MOVDRM RA XOR_SHIFT_SEED
+
+RET

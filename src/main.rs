@@ -30,8 +30,8 @@ use std::{io::Read, fs::File};
 
 use minifb::{Key, Window, WindowOptions};
 
-const WIDTH: usize = 640;
-const HEIGHT: usize = 360;
+const WIDTH: usize = 640*2;
+const HEIGHT: usize = 360*2;
 
 use cpu::CPU;
 
@@ -53,7 +53,7 @@ struct VM {
 }
 
 fn on_update(vm: &mut VM, window: &mut Window) -> bool { 
-    for _ in 0..100000 {
+    for _ in 0..50000 {
         vm.cpu.step(&mut vm.ram);
     }
 
@@ -89,7 +89,7 @@ fn main() {
     //let bin = assemble("res/prg/test.lb");
     //let bin = assemble("res/prg/add.lb");
     //let bin = assemble("res/prg/ISA_configs.Ludde_output.lb");
-    let bin = assemble("res/prg/core.lb");
+    let bin = assemble("res/prg/gol.lb");
 
     ram.set_multiple(0x00, &bin[..]);
     let mut vm = VM {ram, cpu};

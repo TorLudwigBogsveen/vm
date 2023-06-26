@@ -29,6 +29,7 @@ pub struct FrameBuffer {
 
 impl FrameBuffer {
     pub fn new(raw_data: &[u8], width: u16, height: u16, colors: &[Color]) -> FrameBuffer {
+
         let mut frame_buffer = FrameBuffer {
             data: Vec::new(),
         };
