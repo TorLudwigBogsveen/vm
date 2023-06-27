@@ -4,7 +4,7 @@ MOVDIM 3000 BACK_FRAMEBUFFER
 MOVDIM 20000 CURRENT_BUFFER
 MOVDIM 40000 OLD_BUFFER
 CALLI START
-BRK
+
 
 :WIDTH
 .byte 160
@@ -49,9 +49,9 @@ MOVIR 0 HD
 /*Set screen size*/
 INT HD
 
-MOVDIR 0 RB /*y*/
+MOVDIR 1 RB /*y*/
 :INIT_Y_Loop
-MOVDIR 0 RA /*x*/
+MOVDIR 1 RA /*x*/
     :INIT_X_Loop
     PUSHD RA
     PUSHD RB
@@ -82,6 +82,7 @@ MOVDIR 0 RA /*x*/
     /*x += 1*/
     INCD RA
     MOVDMR WIDTH RE
+    DECD RE
     CMPD RA RE
     MOVDIR INIT_X_Loop RE
     MOVIR 1 HD
@@ -90,6 +91,7 @@ MOVDIR 0 RA /*x*/
 
 INCD RB
 MOVDMR HEIGHT RE
+DECD RE
 CMPD RB RE
 MOVDIR INIT_Y_Loop RE
 JNE RE
@@ -100,6 +102,7 @@ CALLI RENDER
 CALLI UPDATE
 CALLI SWITCH_FRAME_BUFFER
 CALLI FLIP_BUFFER
+BRK
 MOVDIR Loop RE
 JMP RE
 
@@ -138,9 +141,9 @@ MOVDRM RC CURRENT_FRAMEBUFFER
 RET
 
 :UPDATE
-MOVDIR 0 RB /*y*/
+MOVDIR 1 RB /*y*/
 :Y_Loop
-MOVDIR 0 RA /*x*/
+MOVDIR 1 RA /*x*/
     :X_Loop
     /*Index calculation*/
     PUSHD RA
@@ -151,9 +154,8 @@ MOVDIR 0 RA /*x*/
     MULD RE RB /*y * width*/
     ADDD RB RA /*index = CURRENT_FRAMEBUFFER + x  + y * width*/
     PUSHD RA
-
     /*Neighbours*/
-    MOVDIR WIDTH RE
+    MOVDMR WIDTH RE
     MOVIR 0 LD
 
     /*MIDDLE LEFT*/
@@ -196,8 +198,10 @@ MOVDIR 0 RA /*x*/
     MOVPR RA HD
     ADD HD LD
 
+
     MOVIR 3 HD
     CMP HD LD
+    
     MOVDIR BIRTH RE
     JE RE
     MOVDIR DEATH RE
@@ -214,6 +218,7 @@ MOVDIR 0 RA /*x*/
     JMP RE
 
     :BIRTH
+    
     MOVIR 1 HD
     MOVDIR END_UPDATE RE
     JMP RE
@@ -235,11 +240,13 @@ MOVDIR 0 RA /*x*/
     /*x += 1*/
     INCD RA
     MOVDMR WIDTH RE
+    DECD RE
     CMPD RA RE
     MOVDIR X_Loop RE
     JNE RE
 INCD RB
 MOVDMR HEIGHT RE
+DECD RE
 CMPD RB RE
 MOVDIR Y_Loop RE
 JNE RE

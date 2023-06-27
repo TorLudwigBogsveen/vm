@@ -50,12 +50,12 @@ impl Flags {
 }
 
 #[derive(Copy)]
-union Register {
+union RegisterValue {
     full: u16,
     high_low: [u8; 2],  
 }
 
-impl Clone for Register {
+impl Clone for RegisterValue {
     fn clone(&self) -> Self { 
         Self {
             full: unsafe { self.full }
@@ -63,47 +63,51 @@ impl Clone for Register {
     }
 }
 
+#[derive(Clone, Copy)]
+struct Register {
+    long_name: &'static str,
+    short_names: Option<(&'static str, &'static str)>,
+    value: RegisterValue,
+}
+
 impl Register {
-    fn full(&self) -> u16 {
-        unsafe { self.full }
-    }
-
-    fn high_low(&self) -> [u8; 2] {
-        unsafe { self.high_low }
-    }
-
-    fn high(&self) -> u8 {
-        unsafe { self.high_low[0] }
-    }
-
-    fn low(&self) -> u8 {
-        unsafe { self.high_low[0] }
+    fn new(long_name: &'static str, short_names: Option<(&'static str, &'static str)>) -> Register {
+        Register { long_name, short_names, value: RegisterValue{full:0} }
     }
 }
 
 #[derive(Clone, Copy)]
 struct Registers {
-    regs: [Register; 256]
+    regs: [Register; 8]
 }
 
 impl Registers {
     fn new() -> Registers {
         Registers {
-            regs: [Register{full:0}; 256]
+            regs: [
+                Register::new("RA", Some(("HA", "LA"))),
+                Register::new("RB", Some(("HB", "LB"))),
+                Register::new("RC", Some(("HC", "LC"))),
+                Register::new("RD", Some(("HD", "LD"))),
+                Register::new("RE", None),
+                Register::new("RF", None),
+                Register::new("IP", None),
+                Register::new("SP", None),
+            ]
         }
     }
 
     fn reg_8(&mut self, reg: u8) -> &mut u8 {
         if reg % 2 == 0 {
-            unsafe { &mut self.regs[reg as usize / 2].high_low[1] }
+            unsafe { &mut self.regs[reg as usize / 2].value.high_low[1] }
         }
         else {
-            unsafe { &mut self.regs[reg as usize / 2].high_low[0] }
+            unsafe { &mut self.regs[reg as usize / 2].value.high_low[0] }
         }
     }
 
     fn reg_16(&mut self, reg: u8) -> &mut u16 {
-        unsafe { &mut self.regs[reg as usize].full }
+        unsafe { &mut self.regs[reg as usize].value.full }
     }
 }
 
@@ -230,11 +234,18 @@ impl CPU {
         ins_ptr
     }
 
-    /*pub fn draw_registers(&self, gfx: &mut Graphics) {
-        let mut offset = -1.0;
+    pub fn registers(&self) -> [(&'static str, u16); 16] {
+        let mut regs = [("", 0); 16];
         for (i, reg) in self.registers.regs.iter().enumerate() {
-            //gfx.draw_string(&format!("{}:{}", i, reg.full()), 0.0, offset);
-            offset += 0.25;
+            regs[i] = (reg.long_name, unsafe { reg.value.full });
         }
-    }*/
+        for i in 0..4 {
+            let reg = &self.registers.regs[i];
+            let (reg1, reg2) = reg.short_names.unwrap();
+            let [val1, val2] = unsafe { reg.value.high_low };
+            regs[8+i*2] = (reg1, val2 as u16);
+            regs[8+i*2+1] = (reg2, val1 as u16);
+        }
+        regs
+    }
 }

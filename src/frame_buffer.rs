@@ -1,5 +1,3 @@
-use crate::color::Color;
-
 /*
  *   Copyright (c) 2020 Ludwig Bogsveen
  *   All rights reserved.
@@ -23,14 +21,21 @@ use crate::color::Color;
  *   SOFTWARE.
  */
 
+use eframe::epaint::ColorImage;
+
+use crate::color::Color;
 pub struct FrameBuffer {
-    pub data: Vec<u32>,
+    width: u16,
+    height: u16,
+    data: Vec<u8>,
 }
 
 impl FrameBuffer {
     pub fn new(raw_data: &[u8], width: u16, height: u16, colors: &[Color]) -> FrameBuffer {
 
         let mut frame_buffer = FrameBuffer {
+            width,
+            height,
             data: Vec::new(),
         };
 
@@ -63,10 +68,18 @@ impl FrameBuffer {
             //println!("n: {}", color_index);
 
             bit_index += n_bits_per_color;
-            let rgba = <u32>::from(colors[color_index as usize % colors.len()]);
-            frame_buffer.data.push(rgba)
+            let (r, g, b, _a) = <(u8, u8, u8, u8)>::from(colors[color_index as usize % colors.len()]);
+            frame_buffer.data.push(r);
+            frame_buffer.data.push(g);
+            frame_buffer.data.push(b);
         }
 
         frame_buffer
+    }
+}
+
+impl From<FrameBuffer> for ColorImage {
+    fn from(fb: FrameBuffer) -> Self {
+        ColorImage::from_rgb([fb.width as usize, fb.height as usize], fb.data.as_slice())
     }
 }
