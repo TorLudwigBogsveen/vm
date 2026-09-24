@@ -41,7 +41,6 @@ mod ram;
 mod instructions;
 mod assembler;
 mod frame_buffer;
-mod io;
 use ram::*;
 use assembler::*;
 
@@ -57,9 +56,9 @@ fn on_update(vm: &mut VM, window: &mut Window) -> bool {
         vm.cpu.step(&mut vm.ram);
     }
 
-    let win_width  = vm.cpu.window.width;
-    let win_height = vm.cpu.window.height;
-    let win_offset = vm.cpu.window.offset;
+    let win_width  = 100;
+    let win_height = 80;
+    let win_offset = 0x8000;
 
     let colors = [Color::from(0xff0d1137), Color::from(0xffe52165)];
 

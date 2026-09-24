@@ -22,7 +22,6 @@
  */
 
 use crate::cpu::*;
-use crate::io;
 use crate::ram::*;
 use num_enum::IntoPrimitive;
 use num_enum::TryFromPrimitive;
@@ -93,26 +92,6 @@ pub enum Instruction {
   SHLD,
   SHRD,
   OUT,
-}
-
-pub fn out(cpu: &mut CPU, ram: &mut RAM) {
-  let src = cpu.ins_ptr(1);
-  let dst = cpu.ins_ptr(1);
-
-  let out_param = *cpu.reg_8(ram.get(src));
-  let out_param = io::OutputDirective::from(out_param);
-
-  let output = match out_param {
-    io::OutputDirective::U8 => {
-      format!("{}", *cpu.reg_8(ram.get(dst)) as u8)
-    },
-    io::OutputDirective::S8 => {
-      format!("{}", *cpu.reg_8(ram.get(dst)) as i8)
-    },
-    _ => unimplemented!()
-  };
-
-  println!("{}", output); //TODO OUTPUT TO CUSTOM CONSOLE
 }
 
 pub fn shl(cpu: &mut CPU, ram: &mut RAM) {
@@ -588,9 +567,6 @@ pub fn int(cpu: &mut CPU, ram: &mut RAM) {
   let interrupt_code = cpu.reg_8(ram.get(ins_ptr));
   match interrupt_code {
     0 => {
-      cpu.window.width  = *cpu.reg_16(0);
-      cpu.window.height = *cpu.reg_16(1);
-      cpu.window.offset = *cpu.reg_16(2);
     }
     _ => {
       for i in 0..6 {

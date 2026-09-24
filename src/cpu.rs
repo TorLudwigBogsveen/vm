@@ -106,19 +106,12 @@ impl Registers {
         unsafe { &mut self.regs[reg as usize].full }
     }
 }
-
-pub struct Window {
-    pub width: u16,
-    pub height: u16,
-    pub offset: u16,
-}
  
 pub struct CPU {
     registers: Registers,
     pub instruction_ptr: u8,
     pub stack_ptr: u8,
     pub flags: Flags,
-    pub window: Window,
 }
  
 impl CPU {
@@ -128,7 +121,6 @@ impl CPU {
             instruction_ptr: 6,
             stack_ptr: 7,
             flags: Flags::new(),
-            window: Window {width: 0, height: 0, offset: 0}
         }
     }
 
@@ -211,7 +203,7 @@ impl CPU {
             Instruction::XNORD  =>xnord(self, ram),
             Instruction::SHLD   => shld(self, ram),
             Instruction::SHRD   => shrd(self, ram),
-            Instruction::OUT    => out(self, ram),
+            Instruction::OUT    => {},
             Instruction::BRK    => self.flags.halted = true,
         }
     }
