@@ -33,6 +33,15 @@ pub struct Flags {
     pub halted: bool,
     pub carry: bool,
 }
+
+const FLAG_NOT_ZERO: u32 = 0b00000001;
+const FLAG_LESS_THAN: u32 = 0b00000010;
+const FLAG_LARGER_THAN: u32 = 0b00000100;
+const FLAG_EQUALS: u32 = 0b00001000;
+const FLAG_OVERFLOW: u32 = 0b00010000;
+const FLAG_UNDERFLOW: u32 = 0b00100000;
+const FLAG_HALTED: u32 = 0b01000000;
+const FLAG_CARRY: u32 = 0b10000000;
  
 impl Flags {
     pub fn new() -> Flags {
@@ -49,94 +58,209 @@ impl Flags {
     }
 }
 
-#[derive(Copy)]
-union Register {
-    full: u16,
-    high_low: [u8; 2],  
-}
-
-impl Clone for Register {
-    fn clone(&self) -> Self { 
-        Self {
-            full: unsafe { self.full }
+impl From<u32> for Flags {
+    fn from(value: u32) -> Self {
+        Flags {
+            not_zero: (value & FLAG_NOT_ZERO) != 0,
+            less_then: (value & FLAG_LESS_THAN) != 0,
+            larger_then: (value & FLAG_LARGER_THAN) != 0,
+            equals: (value & FLAG_EQUALS) != 0,
+            owerflow: (value & FLAG_OVERFLOW) != 0,
+            underflow: (value & FLAG_UNDERFLOW) != 0,
+            halted: (value & FLAG_HALTED) != 0,
+            carry: (value & FLAG_CARRY) != 0,
         }
     }
 }
 
+impl From<Flags> for u32 {
+    fn from(flags: Flags) -> Self {
+        let mut value = 0;
+        if flags.not_zero { value |= FLAG_NOT_ZERO; }
+        if flags.less_then { value |= FLAG_LESS_THAN; }
+        if flags.larger_then { value |= FLAG_LARGER_THAN; }
+        if flags.equals { value |= FLAG_EQUALS; }
+        if flags.owerflow { value |= FLAG_OVERFLOW; }
+        if flags.underflow { value |= FLAG_UNDERFLOW; }
+        if flags.halted { value |= FLAG_HALTED; }
+        if flags.carry { value |= FLAG_CARRY; }
+        value
+    }
+}
+
+#[derive(Copy, Clone)]
+struct Register(u32);
+
 impl Register {
-    fn full(&self) -> u16 {
-        unsafe { self.full }
+
+}
+
+enum RegisterView<'a> {
+    U32(&'a u32),
+    U16(&'a u16),
+    U8(&'a u8),
+}
+
+impl<'a> RegisterView<'a> {
+    fn as_u32(&self) -> &u32 {
+        match self {
+            RegisterView::U32(val) => val,
+            _ => panic!("RegisterView is not a u32"),
+        }
     }
 
-    fn high_low(&self) -> [u8; 2] {
-        unsafe { self.high_low }
+    fn as_u16(&self) -> &u16 {
+        match self {
+            RegisterView::U16(val) => val,
+            _ => panic!("RegisterView is not a u16"),
+        }
     }
 
-    fn high(&self) -> u8 {
-        unsafe { self.high_low[0] }
+    fn as_u8(&self) -> &u8 {
+        match self {
+            RegisterView::U8(val) => val,
+            _ => panic!("RegisterView is not a u8"),
+        }
+    }
+}
+
+enum RegisterViewMut<'a> {
+    U32(&'a mut u32),
+    U16(&'a mut u16),
+    U8(&'a mut u8),
+}
+
+impl<'a> RegisterViewMut<'a> {
+    fn as_u32(&mut self) -> &mut u32 {
+        match self {
+            RegisterViewMut::U32(val) => val,
+            _ => panic!("RegisterView is not a u32"),
+        }
     }
 
-    fn low(&self) -> u8 {
-        unsafe { self.high_low[0] }
+    fn as_u16(&mut self) -> &mut u16 {
+        match self {
+            RegisterViewMut::U16(val) => val,
+            _ => panic!("RegisterView is not a u16"),
+        }
+    }
+
+    fn as_u8(&mut self) -> &mut u8 {
+        match self {
+            RegisterViewMut::U8(val) => val,
+            _ => panic!("RegisterView is not a u8"),
+        }
+    }
+}
+
+enum RegisterName {
+    RIP = 0,
+    RSP = 1,
+    RFLG = 2,
+    R0 = 3,
+    R1 = 4,
+    R2 = 5,
+    R3 = 6,
+    R4 = 7,
+}
+
+impl From<u8> for RegisterName {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => RegisterName::RIP,
+            1 => RegisterName::RSP,
+            2 => RegisterName::RFLG,
+            3 => RegisterName::R0,
+            4 => RegisterName::R1,
+            5 => RegisterName::R2,
+            6 => RegisterName::R3,
+            7 => RegisterName::R4,
+            _ => panic!("Invalid register name: {}", value),
+        }
+    }
+}
+
+impl From<RegisterName> for u8 {
+    fn from(reg: RegisterName) -> Self {
+        match reg {
+            RegisterName::RIP => 0,
+            RegisterName::RSP => 1,
+            RegisterName::RFLG => 2,
+            RegisterName::R0 => 3,
+            RegisterName::R1 => 4,
+            RegisterName::R2 => 5,
+            RegisterName::R3 => 6,
+            RegisterName::R4 => 7,
+        }
     }
 }
 
 #[derive(Clone, Copy)]
 struct Registers {
-    regs: [Register; 256]
+    regs: [Register; 8]
 }
 
 impl Registers {
     fn new() -> Registers {
         Registers {
-            regs: [Register{full:0}; 256]
+            regs: [Register(0); 8]
         }
     }
 
-    fn reg_8(&mut self, reg: u8) -> &mut u8 {
-        if reg % 2 == 0 {
-            unsafe { &mut self.regs[reg as usize / 2].high_low[1] }
-        }
-        else {
-            unsafe { &mut self.regs[reg as usize / 2].high_low[0] }
+    fn view<T: Into<RegisterName>>(&self, reg: T) -> RegisterView {
+        let reg_name = reg.into();
+        match reg_name {
+            RegisterName::RIP => RegisterView::U32(&self.regs[0].0),
+            RegisterName::RSP => RegisterView::U32(&self.regs[1].0),
+            RegisterName::RFLG => RegisterView::U32(&self.regs[2].0),
+            RegisterName::R0 => RegisterView::U32(&self.regs[3].0),
+            RegisterName::R1 => RegisterView::U32(&self.regs[4].0),
+            RegisterName::R2 => RegisterView::U32(&self.regs[5].0),
+            RegisterName::R3 => RegisterView::U32(&self.regs[6].0),
+            RegisterName::R4 => RegisterView::U32(&self.regs[7].0),
         }
     }
 
-    fn reg_16(&mut self, reg: u8) -> &mut u16 {
-        unsafe { &mut self.regs[reg as usize].full }
+    fn view_mut<T: Into<RegisterName>>(&mut self, reg: T) -> RegisterViewMut {
+        let reg_name = reg.into();
+        match reg_name {
+            RegisterName::RIP => RegisterViewMut::U32(&mut self.regs[0].0),
+            RegisterName::RSP => RegisterViewMut::U32(&mut self.regs[1].0),
+            RegisterName::RFLG => RegisterViewMut::U32(&mut self.regs[2].0),
+            RegisterName::R0 => RegisterViewMut::U32(&mut self.regs[3].0),
+            RegisterName::R1 => RegisterViewMut::U32(&mut self.regs[4].0),
+            RegisterName::R2 => RegisterViewMut::U32(&mut self.regs[5].0),
+            RegisterName::R3 => RegisterViewMut::U32(&mut self.regs[6].0),
+            RegisterName::R4 => RegisterViewMut::U32(&mut self.regs[7].0),
+        }
     }
 }
  
 pub struct CPU {
     registers: Registers,
-    pub instruction_ptr: u8,
-    pub stack_ptr: u8,
-    pub flags: Flags,
 }
  
 impl CPU {
     pub fn new() -> CPU {
         CPU {
             registers: Registers::new(),
-            instruction_ptr: 6,
-            stack_ptr: 7,
-            flags: Flags::new(),
         }
     }
 
     pub fn step(&mut self, ram: &mut RAM) {
-        if self.flags.halted {
+        let flags = self.flags();
+        if flags.halted {
             return;
         }
 
-        let instruction = ram.get(self.ins_ptr(1));
+        let instruction = ram.get(*self.registers.view(RegisterName::RIP).as_u32(), 1)[0];
         let instruction = if let Ok(instruction) = Instruction::try_from(instruction) {
             instruction
         } else {
             println!("ERROR INVALID INSTRUCTION [{}] at [{}]",
             instruction,
-            *self.reg_16(self.instruction_ptr)-1);   
-            self.flags.halted = true;
+            *self.registers.view(RegisterName::RIP).as_u32());   
+            self.halt();
             return;
         };
         
@@ -151,18 +275,8 @@ impl CPU {
             Instruction::MOVIM  => movim (self, ram),
             Instruction::MOVRP  => movrp (self, ram),
             Instruction::MOVPR  => movpr (self, ram),
-            Instruction::MOVDRR => movdrr (self, ram),
-            Instruction::MOVDRM => movdrm (self, ram),
-            Instruction::MOVDMR => movdmr (self, ram),
-            Instruction::MOVDMM => movdmm (self, ram),
-            Instruction::MOVDIR => movdir (self, ram),
-            Instruction::MOVDIM => movdim (self, ram),
-            Instruction::MOVDRP => movdrp (self, ram),
-            Instruction::MOVDPR => movdpr (self, ram),
             Instruction::INC    => inc (self, ram),
             Instruction::DEC    => dec (self, ram),
-            Instruction::INCD   => incd(self, ram),
-            Instruction::DECD   => decd(self, ram),
             Instruction::JMP    => jmp (self, ram),
             Instruction::JNE    => jne (self, ram),
             Instruction::JE     => je  (self, ram),
@@ -170,11 +284,8 @@ impl CPU {
             Instruction::JL     => jl  (self, ram),
             Instruction::JC     => jc  (self, ram),
             Instruction::CMP    => cmp (self, ram),
-            Instruction::CMPD   => cmpd (self, ram),
             Instruction::PUSH   => push(self, ram),
             Instruction::POP    => pop (self, ram),
-            Instruction::PUSHD  => pushd(self, ram),
-            Instruction::POPD   => popd(self, ram),
             Instruction::CALL   => call(self, ram),
             Instruction::CALLI  => calli(self, ram),
             Instruction::RET    => ret (self, ram),
@@ -191,35 +302,40 @@ impl CPU {
             Instruction::XNOR   =>xnor(self, ram),
             Instruction::SHL    => shl(self, ram),
             Instruction::SHR    => shr(self, ram),
-            Instruction::ADDD   => addd(self, ram),
-            Instruction::SUBD   => subd(self, ram),
-            Instruction::MULD   => muld(self, ram),
-            Instruction::DIVD   => divd(self, ram),
-            Instruction::ORD    => ord(self, ram),
-            Instruction::ANDD   => andd(self, ram),
-            Instruction::XORD   => xord(self, ram),
-            Instruction::NORD   => nord(self, ram),
-            Instruction::NANDD  =>nandd(self, ram),
-            Instruction::XNORD  =>xnord(self, ram),
-            Instruction::SHLD   => shld(self, ram),
-            Instruction::SHRD   => shrd(self, ram),
-            Instruction::OUT    => {},
-            Instruction::BRK    => self.flags.halted = true,
+            Instruction::BRK    => self.halt(),
         }
     }
 
-    pub fn reg_8(&mut self, reg: u8) -> &mut u8 {
-        self.registers.reg_8(reg)
+    fn has_halted(&self) -> bool {
+        let flags = self.flags();
+        flags.halted
     }
 
-    pub fn reg_16(&mut self, reg: u8) -> &mut u16 {
-        self.registers.reg_16(reg)
+    fn halt(&mut self) {
+        let mut f = self.flags(); 
+        f.halted = true; 
+        self.set_flags(f);
     }
 
-    pub fn ins_ptr(&mut self, addvance: u16) -> u16 {
-        let ins_ptr = *self.reg_16(self.instruction_ptr);
-        *self.reg_16(self.instruction_ptr) = self.reg_16(self.instruction_ptr).wrapping_add(addvance);
-        ins_ptr
+    fn flags(&self) -> Flags {
+        let flags_u32 = *self.registers.view(RegisterName::RFLG).as_u32();
+        let flags = Flags::from(flags_u32);
+        flags
+    }
+
+    fn set_flags(&mut self, flags: Flags) {
+        let flags_u32 = u32::from(flags);
+        *self.registers.view_mut(RegisterName::RFLG).as_u32() = flags_u32;
+    }
+
+    fn rip(&self) -> u32 {
+        *self.registers.view(RegisterName::RIP).as_u32()
+    }
+
+    pub fn rip_advance(&mut self, amount: u32) -> u32 {
+        let current_rip = self.rip();
+        *self.registers.view_mut(RegisterName::RIP).as_u32() = current_rip + amount;
+        current_rip
     }
 
     /*pub fn draw_registers(&self, gfx: &mut Graphics) {

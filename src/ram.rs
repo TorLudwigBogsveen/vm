@@ -32,31 +32,13 @@
       }
     }
   
-    pub fn get(&self, index: u16) -> u8 {
-      let val = self.buff[index as usize];
-      //println!("memget: {:X} : {:X}", index, val);
-      val
+    pub fn get(&self, physical_address: u32, len: usize) -> &[u8] {
+      &self.buff[physical_address as usize..physical_address as usize + len]
     }
   
-    pub fn get_ptr(&self, index: u16) -> u16 {
-      self.get(index) as u16 + ((self.get(index + 1) as u16) << 8)
-    }
-  
-    pub fn set(&mut self, index: u16, val: u8) {
-      //println!("DST: {} SRC: {}", index, val);
-      self.buff[index as usize] = val;
-      //println!("memset: {:X} : {:X}", index, val);
-    }
-  
-    pub fn set_multiple(&mut self, index: u16, vals: &[u8]) {
-      let mut index = index;
-      for val in vals {
-        self.set(index, *val);
-        index += 1;
-      }
-    }
-  
-    pub fn set_ptr(&mut self, index: u16, val: u16) {
-      self.set(index+1, (val >> 8) as u8); self.set(index, val as u8);
+    pub fn set(&mut self, physical_address: u32, values: &[u8]) {
+      //println!("DST: {} SRC: {}", physical_address, val);
+      self.buff[physical_address as usize..physical_address as usize + values.len()].copy_from_slice(values);
+      //println!("memset: {:X} : {:X}", physical_address, val);
     }
   }

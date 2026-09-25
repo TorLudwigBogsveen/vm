@@ -90,7 +90,7 @@ fn main() {
     //let bin = assemble("res/prg/ISA_configs.Ludde_output.lb");
     let bin = assemble("res/prg/gol.lb");
 
-    ram.set_multiple(0x00, &bin[..]);
+    ram.set(0x00, &bin[..]);
     let mut vm = VM {ram, cpu};
 
     let mut window = Window::new(
